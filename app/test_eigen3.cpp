@@ -884,7 +884,7 @@ static void test_edge_cases() {
                 3, 6, 9;
     Eigen::Vector3f b(1, 2, 3);
     Eigen::JacobiSVD<Eigen::Matrix3f> svd_s(singular,
-        Eigen::ComputeThinU | Eigen::ComputeThinV);
+        Eigen::ComputeFullU | Eigen::ComputeFullV);
     Eigen::Vector3f x = svd_s.solve(b);
     // Should produce a solution (minimum-norm), not crash
     VERIFY(x.size() == 3);

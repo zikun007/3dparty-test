@@ -119,9 +119,6 @@ install(DIRECTORY include/
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     COMPONENT Devel
 )
-if(SPDLOG_COMPILED_LIB)
-    install(TARGETS spdlog EXPORT spdlogTargets COMPONENT Devel)
-endif()
 install(TARGETS spdlog_headers EXPORT spdlogTargets COMPONENT Devel)
 install(EXPORT spdlogTargets
     NAMESPACE spdlog::
