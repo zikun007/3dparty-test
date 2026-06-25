@@ -1,0 +1,114 @@
+# ==================================
+# 通用规则（系统默认生成）
+# ==================================
+
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# ==================================
+# Visual Studio 项目自动生成的文件夹/文件
+# ==================================
+
+# VS 临时缓存目录
+.vs/
+
+# 构建输出文件夹
+x64/
+x86/
+Debug/
+Release/
+
+# VS 项目配置和用户临时文件
+*.VC.db
+*.VC.opendb
+*.user
+*.suo
+*.cache
+*.log
+*.tlog
+*.ipch
+*.tmp
+
+# VS 响应文件（链接器或编译器参数）
+*.rsp
+
+# VS 分析与调试文件
+*.psess
+*.vsp
+*.vspx
+*.vspscc
+*.vssscc
+
+# vcpkg 安装内容（如使用）
+.vcpkg_installed/
+packages/
+
+# VS Code 配置（如协同使用）
+.vscode/
+
+# 备份文件
+*~
+*.bak
+
+# 项目文件夹
+docs/
+out/
+build/
+
+# 其他文件和文件夹
+.DS_Store
+
+.idea
+*.json
+.claude
+.codex
