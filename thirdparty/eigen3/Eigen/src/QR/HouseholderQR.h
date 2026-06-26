@@ -413,7 +413,11 @@ void HouseholderQR<MatrixType>::computeInPlace()
 
   m_temp.resize(cols);
 
-  internal::householder_qr_inplace_blocked<MatrixType, HCoeffsType>::run(m_qr, m_hCoeffs, 48, m_temp.data());
+  // Embedded profile: SRKF/GNSS-INS matrices are typically small, and the
+  // blocked path instantiates much heavier expression templates. Some native
+  // AArch64 GCC 13.3 toolchains have been observed to fail while compiling
+  // that path, so this profile uses the simpler unblocked implementation.
+  internal::householder_qr_inplace_unblocked(m_qr, m_hCoeffs, m_temp.data());
 
   m_isInitialized = true;
 }

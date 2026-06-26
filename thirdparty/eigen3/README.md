@@ -155,6 +155,8 @@ Eigen::Matrix3f S_pred =
 
 `Quaternion::FromTwoVectors()` 已改为不依赖 SVD 的实现，保留用于姿态初始化等导航场景。
 
+`HouseholderQR` 在本裁剪版中默认使用 unblocked 实现。SRKF/GNSS-INS 常见矩阵较小，unblocked 路径更简单，也可避开部分 AArch64 GCC 13.3 本机编译器在 blocked Householder 模板路径上的编译失败。
+
 `Transform::computeRotationScaling()`、`Transform::computeScalingRotation()` 和非 `Isometry` 模式下的部分 `rotation()` 路径仍属于上游 SVD 相关接口。请避免在本裁剪版中调用这些接口。
 
 ## 许可证
