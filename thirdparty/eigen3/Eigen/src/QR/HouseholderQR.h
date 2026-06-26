@@ -303,7 +303,7 @@ template<typename MatrixQR, typename HCoeffs,
   bool InnerStrideIsOne = (MatrixQR::InnerStrideAtCompileTime == 1 && HCoeffs::InnerStrideAtCompileTime == 1)>
 struct householder_qr_inplace_blocked
 {
-  // This is specialized for LAPACK-supported Scalar types in HouseholderQR_LAPACKE.h
+  // Embedded profile: external LAPACK specializations are intentionally removed.
   static void run(MatrixQR& mat, HCoeffs& hCoeffs, Index maxBlockSize=32,
       typename MatrixQR::Scalar* tempData = 0)
   {

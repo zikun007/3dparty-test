@@ -642,24 +642,14 @@ EIGEN_DEVICE_FUNC inline Derived& QuaternionBase<Derived>::setFromTwoVectors(con
   Vector3 v1 = b.normalized();
   Scalar c = v1.dot(v0);
 
-  // if dot == -1, vectors are nearly opposites
-  // => accurately compute the rotation axis by computing the
-  //    intersection of the two planes. This is done by solving:
-  //       x^T v0 = 0
-  //       x^T v1 = 0
-  //    under the constraint:
-  //       ||x|| = 1
-  //    which yields a singular value problem
+  // If dot == -1, vectors are nearly opposites. The upstream Eigen
+  // implementation computes the fallback axis through SVD; this trimmed
+  // embedded profile uses a deterministic orthogonal axis to keep
+  // Quaternion independent from the SVD module.
   if (c < Scalar(-1)+NumTraits<Scalar>::dummy_precision())
   {
-    c = numext::maxi(c,Scalar(-1));
-    Matrix<Scalar,2,3> m; m << v0.transpose(), v1.transpose();
-    JacobiSVD<Matrix<Scalar,2,3> > svd(m, ComputeFullV);
-    Vector3 axis = svd.matrixV().col(2);
-
-    Scalar w2 = (Scalar(1)+c)*Scalar(0.5);
-    this->w() = sqrt(w2);
-    this->vec() = axis * sqrt(Scalar(1) - w2);
+    this->w() = Scalar(0);
+    this->vec() = v0.unitOrthogonal();
     return derived();
   }
   Vector3 axis = v0.cross(v1);

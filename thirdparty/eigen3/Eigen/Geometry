@@ -10,7 +10,6 @@
 
 #include "Core"
 
-#include "SVD"
 #include "LU"
 #include <limits>
 
@@ -24,9 +23,7 @@
   *  - \link Quaternion quaternions \endlink
   *  - cross products (\ref MatrixBase::cross, \ref MatrixBase::cross3)
   *  - orthognal vector generation (\ref MatrixBase::unitOrthogonal)
-  *  - some linear components: \link ParametrizedLine parametrized-lines \endlink and \link Hyperplane hyperplanes \endlink
-  *  - \link AlignedBox axis aligned bounding boxes \endlink
-  *  - \link umeyama least-square transformation fitting \endlink
+  *  - lightweight rotation and transformation primitives for embedded navigation
   *
   * \code
   * #include <Eigen/Geometry>
@@ -44,10 +41,6 @@
 #include "src/Geometry/Transform.h"
 #include "src/Geometry/Translation.h"
 #include "src/Geometry/Scaling.h"
-#include "src/Geometry/Hyperplane.h"
-#include "src/Geometry/ParametrizedLine.h"
-#include "src/Geometry/AlignedBox.h"
-#include "src/Geometry/Umeyama.h"
 
 // Use the SSE optimized version whenever possible.
 #if (defined EIGEN_VECTORIZE_SSE) || (defined EIGEN_VECTORIZE_NEON)

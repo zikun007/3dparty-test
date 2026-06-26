@@ -99,12 +99,10 @@ template<typename Index> struct GemmParallelInfo
 template<bool Condition, typename Functor, typename Index>
 void parallelize_gemm(const Functor& func, Index rows, Index cols, Index depth, bool transpose)
 {
-  // TODO when EIGEN_USE_BLAS is defined,
-  // we should still enable OMP for other scalar types
   // Without C++11, we have to disable GEMM's parallelization on
   // non x86 architectures because there volatile is not enough for our purpose.
   // See bug 1572.
-#if (! defined(EIGEN_HAS_OPENMP)) || defined(EIGEN_USE_BLAS) || ((!EIGEN_HAS_CXX11_ATOMIC) && !(EIGEN_ARCH_i386_OR_x86_64))
+#if (! defined(EIGEN_HAS_OPENMP)) || ((!EIGEN_HAS_CXX11_ATOMIC) && !(EIGEN_ARCH_i386_OR_x86_64))
   // FIXME the transpose variable is only needed to properly split
   // the matrix product when multithreading is enabled. This is a temporary
   // fix to support row-major destination matrices. This whole

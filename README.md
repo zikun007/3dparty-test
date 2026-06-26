@@ -10,10 +10,10 @@
 ├── README.md                   # 本文件
 ├── .gitignore
 ├── app/
-│   ├── test_eigen3.cpp         # Eigen3 全面测试（169 个断言）
+│   ├── test_eigen3.cpp         # Eigen3 SRKF 冒烟测试（48 个断言）
 │   └── test_spdlog.cpp         # spdlog 全面测试（27 个断言）
 └── thirdparty/
-    ├── eigen3/                 # → Eigen3 裁剪版（Dense-only, 5.8 MB）
+    ├── eigen3/                 # → Eigen3 SRKF 嵌入式裁剪版（约 3.0 MB）
     │   ├── README.md           #    详细使用说明
     │   ├── CMakeLists.txt
     │   ├── COPYING.MPL2
@@ -28,15 +28,15 @@
 
 ## 包含的库
 
-### Eigen3 — 线性代数（Dense-only）
+### Eigen3 — 线性代数（SRKF 嵌入式裁剪版）
 
 | 项目 | 详情 |
 |---|---|
 | **上游** | [eigen.tuxfamily.org](https://eigen.tuxfamily.org/) |
 | **许可证** | MPL 2.0 |
-| **保留模块** | Core, Geometry, LU, Cholesky, QR, SVD, Eigenvalues, Householder, Jacobi |
-| **去除模块** | Sparse, 外部求解器 (SuiteSparse/Metis/PaStiX), unsupported (Tensor/AutoDiff/FFT 等) |
-| **大小** | 5.8 MB（原始 ~6.8 MB） |
+| **保留模块** | Core, Geometry, LU, Cholesky, QR, Householder, Jacobi, STL 对齐容器支持 |
+| **去除模块** | Sparse, SVD, Eigenvalues, BLAS/LAPACK/MKL, GPU/CUDA/HIP/SYCL, unsupported |
+| **大小** | 约 3.0 MB |
 | **CMake 目标** | `Eigen3::Eigen` |
 
 ```cpp
@@ -85,7 +85,7 @@ ctest
 ```
 100% tests passed, 0 tests failed out of 2
 
-Test #1: Eigen3Smoke ... Passed   (169/169 assertions)
+Test #1: Eigen3Smoke ... Passed   ( 48/ 48 assertions)
 Test #2: SpdlogSmoke ... Passed   ( 27/ 27 assertions)
 ```
 

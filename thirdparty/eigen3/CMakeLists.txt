@@ -1,4 +1,4 @@
-# Eigen3 — trimmed Dense-only, header-only library
+# Eigen3 — SRKF embedded profile, header-only library
 #
 # Usage from parent project:
 #   add_subdirectory(thirdparty/eigen3)
@@ -31,6 +31,31 @@ target_include_directories(Eigen3 INTERFACE
 # Eigen 3.4+ prefers C++14 but degrades gracefully to C++11.
 # -------------------------------------------------------------------
 target_compile_features(Eigen3 INTERFACE cxx_std_11)
+
+# -------------------------------------------------------------------
+# Embedded runtime profile.
+#
+# Vectorization is left enabled by default so ARMv8-A targets such as
+# Cortex-A55 can use NEON/ASIMD when the toolchain target enables it.
+# Eigen/OpenMP internal parallelism stays disabled by default because
+# SRKF/GNSS-INS matrices are usually small and latency-sensitive.
+# -------------------------------------------------------------------
+option(EIGEN3_ENABLE_VECTORIZATION "Enable Eigen SIMD vectorization when supported by the target compiler" ON)
+option(EIGEN3_ENABLE_PARALLEL "Enable Eigen internal parallelization/OpenMP" OFF)
+
+if(NOT EIGEN3_ENABLE_VECTORIZATION)
+    target_compile_definitions(Eigen3 INTERFACE EIGEN_DONT_VECTORIZE)
+    message(STATUS "Eigen3: SIMD vectorization disabled")
+else()
+    message(STATUS "Eigen3: SIMD vectorization enabled when supported by target flags")
+endif()
+
+if(NOT EIGEN3_ENABLE_PARALLEL)
+    target_compile_definitions(Eigen3 INTERFACE EIGEN_DONT_PARALLELIZE)
+    message(STATUS "Eigen3: internal parallelization disabled")
+else()
+    message(STATUS "Eigen3: internal parallelization enabled")
+endif()
 
 # Suppress pedantic warnings that Eigen's template-heavy headers trigger.
 # These apply to all consumers via the interface library, but only when
@@ -73,4 +98,4 @@ install(EXPORT Eigen3Targets
     COMPONENT Devel
 )
 
-message(STATUS "Eigen3 (trimmed Dense-only): ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "Eigen3 (SRKF embedded profile): ${CMAKE_CURRENT_SOURCE_DIR}")

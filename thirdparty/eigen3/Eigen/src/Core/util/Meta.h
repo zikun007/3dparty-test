@@ -19,10 +19,6 @@
   #include <math_constants.h>
  #endif
 
- #if defined(EIGEN_HIP_DEVICE_COMPILE)
-  #include "Eigen/src/Core/arch/HIP/hcc/math_constants.h"
-  #endif
-
 #endif
 
 // Recent versions of ICC require <cstdint> for pointer types below.
