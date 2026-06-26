@@ -206,7 +206,9 @@ static void test_qr_and_srkf_update() {
     Eigen::HouseholderQR<Eigen::Matrix<float, 6, 3>> sr_qr(stacked);
     Eigen::Matrix3f S_pred = sr_qr.matrixQR().topRows<3>().triangularView<Eigen::Upper>();
     VERIFY(S_pred.rows() == 3 && S_pred.cols() == 3);
-    VERIFY((S_pred.transpose() * S_pred).isApprox(stacked.transpose() * stacked, 1e-4f));
+    const Eigen::Matrix3f predicted_cov = (S_pred.transpose() * S_pred).eval();
+    const Eigen::Matrix3f reference_cov = (stacked.transpose() * stacked).eval();
+    VERIFY(predicted_cov.isApprox(reference_cov, 1e-4f));
     VERIFY(S_pred.array().isFinite().all());
     VERIFY(std::abs(S_pred(2, 0)) < 1e-6f && std::abs(S_pred(2, 1)) < 1e-6f);
 }
