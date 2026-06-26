@@ -321,9 +321,17 @@ template<> struct ldlt_inplace<Lower>
     for (Index k = 0; k < size; ++k)
     {
       // Find largest diagonal element
-      Index index_of_biggest_in_corner;
-      mat.diagonal().tail(size-k).cwiseAbs().maxCoeff(&index_of_biggest_in_corner);
-      index_of_biggest_in_corner += k;
+      Index index_of_biggest_in_corner = k;
+      RealScalar biggest_in_corner = abs(mat.coeff(k,k));
+      for(Index i = k + 1; i < size; ++i)
+      {
+        RealScalar abs_diagonal = abs(mat.coeff(i,i));
+        if(abs_diagonal > biggest_in_corner)
+        {
+          biggest_in_corner = abs_diagonal;
+          index_of_biggest_in_corner = i;
+        }
+      }
 
       transpositions.coeffRef(k) = IndexType(index_of_biggest_in_corner);
       if(k != index_of_biggest_in_corner)
