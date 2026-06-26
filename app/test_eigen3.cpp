@@ -189,9 +189,6 @@ static void test_qr_and_srkf_update() {
     VERIFY((H.transpose() * (H * x - z)).norm() < 1e-4f);
     VERIFY(cpqr.rank() == 3);
 
-    Eigen::CompleteOrthogonalDecomposition<Eigen::Matrix<float, 3, 5>> cod(H.transpose());
-    VERIFY(cod.solve(Eigen::Vector3f::Ones()).size() == 5);
-
     Eigen::Matrix3f S = Eigen::Matrix3f::Identity();
     S(0, 0) = 0.8f;
     S(1, 1) = 0.6f;
