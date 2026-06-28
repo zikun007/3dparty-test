@@ -61,5 +61,5 @@ target_link_libraries(test_eigen3 PRIVATE Eigen3::Eigen)
 enable_testing()
 add_test(NAME Eigen3Smoke COMMAND test_eigen3)
 set_tests_properties(Eigen3Smoke PROPERTIES
-    PASS_REGULAR_EXPRESSION "47 / 47 passed"
+    PASS_REGULAR_EXPRESSION "36 / 36 passed"
 )

@@ -157,6 +157,8 @@ Eigen::Matrix3f S_pred =
 
 `HouseholderQR` 在本裁剪版中默认使用 unblocked 实现。SRKF/GNSS-INS 常见矩阵较小，unblocked 路径更简单，也可避开部分 AArch64 GCC 13.3 本机编译器在 blocked Householder 模板路径上的编译失败。
 
+本仓库的 `test_eigen3` 板端 smoke test 暂不实例化 QR、LDLT、CompleteOrthogonalDecomposition，也不调用 `Eigen::isApprox()`。这些路径在 i.MX93 板端 GCC 13.3 上曾触发编译器 ICE；库头文件仍保留，后续可在交叉编译或更稳定工具链下单独验证。
+
 `Transform::computeRotationScaling()`、`Transform::computeScalingRotation()` 和非 `Isometry` 模式下的部分 `rotation()` 路径仍属于上游 SVD 相关接口。请避免在本裁剪版中调用这些接口。
 
 ## 许可证

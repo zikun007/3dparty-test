@@ -10,7 +10,7 @@
 ├── README.md                   # 本文件
 ├── .gitignore
 ├── app/
-│   ├── test_eigen3.cpp         # Eigen3 SRKF 冒烟测试（47 个断言）
+│   ├── test_eigen3.cpp         # Eigen3 板端基础冒烟测试（36 个断言）
 │   └── test_spdlog.cpp         # spdlog 全面测试（27 个断言）
 └── thirdparty/
     ├── eigen3/                 # → Eigen3 SRKF 嵌入式裁剪版（约 3.0 MB）
@@ -85,7 +85,7 @@ ctest
 ```
 100% tests passed, 0 tests failed out of 2
 
-Test #1: Eigen3Smoke ... Passed   ( 47/ 47 assertions)
+Test #1: Eigen3Smoke ... Passed   ( 36/ 36 assertions)
 Test #2: SpdlogSmoke ... Passed   ( 27/ 27 assertions)
 ```
 
