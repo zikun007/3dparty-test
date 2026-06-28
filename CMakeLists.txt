@@ -25,7 +25,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib"
 # ======================================================================
 # 2. User-configurable build options
 # ======================================================================
-option(USE_EIGEN_VECTORIZATION "Enable Eigen SIMD (NEON/SSE). ON for ARMv8-A NEON targets such as Cortex-A55" ON)
+option(USE_EIGEN_VECTORIZATION "Enable Eigen SIMD (NEON/SSE). ON for ARMv8-A NEON targets such as Cortex-A55" OFF)
 option(USE_EIGEN_PARALLEL      "Enable Eigen internal OpenMP parallelization"    OFF)
 
 # ======================================================================

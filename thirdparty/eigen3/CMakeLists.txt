@@ -40,7 +40,7 @@ target_compile_features(Eigen3 INTERFACE cxx_std_11)
 # Eigen/OpenMP internal parallelism stays disabled by default because
 # SRKF/GNSS-INS matrices are usually small and latency-sensitive.
 # -------------------------------------------------------------------
-option(EIGEN3_ENABLE_VECTORIZATION "Enable Eigen SIMD vectorization when supported by the target compiler" ON)
+option(EIGEN3_ENABLE_VECTORIZATION "Enable Eigen SIMD vectorization when supported by the target compiler" OFF)
 option(EIGEN3_ENABLE_PARALLEL "Enable Eigen internal parallelization/OpenMP" OFF)
 
 if(NOT EIGEN3_ENABLE_VECTORIZATION)
