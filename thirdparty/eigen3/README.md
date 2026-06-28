@@ -1,6 +1,6 @@
 # Eigen3 SRKF 嵌入式裁剪版
 
-本目录是面向 GNSS/INS 组合导航和平方根卡尔曼滤波（SRKF）的 Eigen 头文件裁剪版。目标是保留小矩阵、姿态、QR/Cholesky 等实时导航常用能力，删除 SVD、特征值求解、外部 BLAS/LAPACK/MKL 适配和不相关硬件后端，降低源码体积和嵌入式编译负担。
+本目录是面向 GNSS/INS 组合导航和平方根卡尔曼滤波（SRKF）的 Eigen 头文件裁剪版。目标是保留小矩阵、姿态、LLT Cholesky 和 LU 等嵌入式导航常用能力，删除在 i.MX93 板端 GCC 13.3 上反复触发编译器 ICE 的 QR、LDLT、COD、矩阵/几何层 `isApprox`，同时删除 SVD、特征值求解、外部 BLAS/LAPACK/MKL 适配和不相关硬件后端，降低源码体积和嵌入式编译负担。
 
 Eigen 仍然是 header-only 库。通过 CMake 引入时只提供 include 路径和编译宏，不生成可链接库。
 
@@ -10,10 +10,9 @@ Eigen 仍然是 header-only 库。通过 CMake 引入时只提供 include 路径
 |---|---|---|
 | `Core` | 保留 | 矩阵、向量、块操作、Map、Ref、三角视图、表达式模板和矩阵乘法基础 |
 | `LU` | 保留 | 小矩阵求逆、行列式和线性方程求解的工程兼容能力；SRKF 主流程仍建议避免显式求逆 |
-| `Cholesky` | 保留 | `LLT` / `LDLT` 可用于协方差平方根初始化、正定性检查和 SPD 系统求解 |
-| `QR` | 保留 | SRKF 时间更新和量测更新常用 QR 分解维护平方根阵 |
-| `Householder` | 保留 | QR 内部依赖，提供 Householder 反射和序列 |
-| `Jacobi` | 保留 | QR/Cholesky 相关旋转基础组件 |
+| `Cholesky` | 仅保留 `LLT` | 用于 SPD 协方差平方根初始化、正定性检查和 SPD 系统求解 |
+| `Householder` | 轻量保留 | 保留基础 Householder 反射/序列头，供后续必要场景复用；不再提供 QR 分解入口 |
+| `Jacobi` | 保留 | 保留基础旋转组件 |
 | `Geometry` | 轻量保留 | 四元数、AngleAxis、Rotation2D、Transform、Translation、Scaling、欧拉角和姿态坐标变换 |
 | `StdVector` / `StdDeque` / `StdList` | 保留 | Eigen 对齐分配器和 STL 容器适配 |
 | `Core/arch/Default` | 保留 | 通用标量实现，所有平台都需要 |
@@ -27,6 +26,10 @@ Eigen 仍然是 header-only 库。通过 CMake 引入时只提供 include 路径
 |---|---|
 | `SVD` / `BDCSVD` / `JacobiSVD` 模块入口和实现 | SRKF 主流程不需要奇异值分解，删除可明显降低编译负担 |
 | `Eigenvalues` 模块入口和实现 | 特征值求解偏离实时嵌入式导航主流程，适合离线调试而非本裁剪版运行时 |
+| `QR` / `HouseholderQR` / `ColPivHouseholderQR` / `FullPivHouseholderQR` | i.MX93 板端 GCC 13.3 多次在 QR 模板路径触发 ICE，暂不纳入板端裁剪版 |
+| `CompleteOrthogonalDecomposition` (COD) | 依赖复杂 QR 路径，板端编译失败风险高 |
+| `LDLT` | i.MX93 板端 GCC 13.3 在 LDLT/maxCoeff/Visitor 相关模板路径触发 ICE；保留更稳定的 `LLT` |
+| 矩阵/几何层 `isApprox()` / `isMuchSmallerThan()` | 矩阵级 fuzzy comparison 会实例化复杂表达式模板，板端曾触发 ICE；建议测试代码使用显式循环比较 |
 | `Geometry/Umeyama.h` | 相似变换拟合依赖 SVD，不属于 GNSS/INS 核心路径 |
 | `Geometry/Hyperplane.h` / `ParametrizedLine.h` / `AlignedBox.h` | 几何辅助类型，导航姿态/坐标变换主流程不需要 |
 | BLAS/LAPACK/MKL 适配头 | 本库按 header-only 嵌入式使用，不引入外部线性代数库 |
@@ -88,11 +91,10 @@ target_include_directories(your_target PRIVATE thirdparty/eigen3)
 ```cpp
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
-#include <Eigen/QR>
 #include <Eigen/Geometry>
 ```
 
-`#include <Eigen/Eigen>` 和 `#include <Eigen/Dense>` 当前等价于引入本裁剪版 Dense 聚合能力：`Core + LU + Cholesky + QR + Geometry`。
+`#include <Eigen/Eigen>` 和 `#include <Eigen/Dense>` 当前等价于引入本裁剪版 Dense 聚合能力：`Core + LU + LLT Cholesky + Geometry`。
 
 ## i.MX93 / Cortex-A55 建议
 
@@ -115,27 +117,31 @@ target_compile_options(your_target PRIVATE -mcpu=cortex-a55)
 target_compile_options(your_target PRIVATE -march=armv8-a+simd)
 ```
 
-实际收益需要在目标板测试。四元数、`3x3`、`4x4` 极小矩阵收益可能不明显；`15x15`、`18x18`、`30x30` 矩阵乘法和 QR 更新更值得对比。
+实际收益需要在目标板测试。四元数、`3x3`、`4x4` 极小矩阵收益可能不明显；`15x15`、`18x18`、`30x30` 矩阵乘法更值得对比。
 
 ## SRKF 使用建议
 
 - 优先使用固定大小矩阵，例如 `Eigen::Matrix<float, 15, 15>`。
 - 尽量避免 `MatrixXf`，除非维度确实运行时才确定。
-- SRKF 更新优先使用 QR/Cholesky，不要用显式 `.inverse()` 作为主路径。
+- SRKF 中仍可使用 `LLT` 做 SPD 协方差平方根初始化和正定性检查。
+- 本裁剪版不再提供 QR，因此平方根滤波的正交化/三角化步骤建议先使用项目内显式 Givens/Householder 小矩阵实现，或在交叉编译工具链稳定后再单独恢复 QR。
+- 不要用显式 `.inverse()` 作为滤波主路径；小维度测试可保留 `.inverse()` 验证 Eigen LU 能力。
 - 乘法赋值可按需使用 `noalias()` 减少临时对象。
 - 若使用 STL 容器保存固定大小 Eigen 对象，使用 `Eigen::aligned_allocator`。
 
-示例：
+显式比较示例：
 
 ```cpp
-#include <Eigen/QR>
-
-Eigen::Matrix<float, 6, 3> stacked;
-// stacked << S, Qsqrt;
-
-Eigen::HouseholderQR<Eigen::Matrix<float, 6, 3>> qr(stacked);
-Eigen::Matrix3f S_pred =
-    qr.matrixQR().topRows<3>().triangularView<Eigen::Upper>();
+template <typename Lhs, typename Rhs>
+bool coeffsNear(const Eigen::MatrixBase<Lhs>& lhs,
+                const Eigen::MatrixBase<Rhs>& rhs,
+                float eps) {
+    if (lhs.rows() != rhs.rows() || lhs.cols() != rhs.cols()) return false;
+    for (Eigen::Index r = 0; r < lhs.rows(); ++r)
+        for (Eigen::Index c = 0; c < lhs.cols(); ++c)
+            if (std::abs(lhs(r, c) - rhs(r, c)) > eps) return false;
+    return true;
+}
 ```
 
 ## API 边界
@@ -144,10 +150,24 @@ Eigen::Matrix3f S_pred =
 
 - `#include <Eigen/SVD>`
 - `#include <Eigen/Eigenvalues>`
+- `#include <Eigen/QR>`
 - `Eigen::JacobiSVD`
 - `Eigen::BDCSVD`
 - `Eigen::SelfAdjointEigenSolver`
 - `Eigen::EigenSolver`
+- `Eigen::HouseholderQR`
+- `Eigen::ColPivHouseholderQR`
+- `Eigen::FullPivHouseholderQR`
+- `Eigen::CompleteOrthogonalDecomposition`
+- `Eigen::LDLT`
+- `MatrixBase::ldlt()`
+- `MatrixBase::householderQr()`
+- `MatrixBase::colPivHouseholderQr()`
+- `MatrixBase::fullPivHouseholderQr()`
+- `MatrixBase::completeOrthogonalDecomposition()`
+- `MatrixBase::isApprox()`
+- `MatrixBase::isMuchSmallerThan()`
+- 几何类型的 `isApprox()`，例如 `Quaternion::isApprox()` / `Transform::isApprox()`
 - `Eigen::umeyama`
 - `Eigen::Hyperplane`
 - `Eigen::ParametrizedLine`
@@ -155,9 +175,7 @@ Eigen::Matrix3f S_pred =
 
 `Quaternion::FromTwoVectors()` 已改为不依赖 SVD 的实现，保留用于姿态初始化等导航场景。
 
-`HouseholderQR` 在本裁剪版中默认使用 unblocked 实现。SRKF/GNSS-INS 常见矩阵较小，unblocked 路径更简单，也可避开部分 AArch64 GCC 13.3 本机编译器在 blocked Householder 模板路径上的编译失败。
-
-本仓库的 `test_eigen3` 板端 smoke test 暂不实例化 QR、LDLT、CompleteOrthogonalDecomposition，也不调用 `Eigen::isApprox()`。这些路径在 i.MX93 板端 GCC 13.3 上曾触发编译器 ICE；库头文件仍保留，后续可在交叉编译或更稳定工具链下单独验证。
+本仓库默认构建 `test_eigen3`、`test_systime` 和 `test_syscoord`。其中 `test_eigen3` 已合并为单文件板端测试，覆盖 GNSS/INS 紧组合常用的固定维矩阵、协方差传播/更新、LU、LLT、四元数、姿态旋转、反对称矩阵和 Eigen 对齐容器，同时避开 QR、LDLT、COD 和 `isApprox()`。
 
 `Transform::computeRotationScaling()`、`Transform::computeScalingRotation()` 和非 `Isometry` 模式下的部分 `rotation()` 路径仍属于上游 SVD 相关接口。请避免在本裁剪版中调用这些接口。
 

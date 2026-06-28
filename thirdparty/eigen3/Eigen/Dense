@@ -1,5 +1,4 @@
 #include "Core"
 #include "LU"
 #include "Cholesky"
-#include "QR"
 #include "Geometry"

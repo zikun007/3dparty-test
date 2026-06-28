@@ -151,13 +151,6 @@ public:
 
   EIGEN_DEVICE_FUNC static inline Rotation2D Identity() { return Rotation2D(0); }
 
-  /** \returns \c true if \c *this is approximately equal to \a other, within the precision
-    * determined by \a prec.
-    *
-    * \sa MatrixBase::isApprox() */
-  EIGEN_DEVICE_FUNC bool isApprox(const Rotation2D& other, const typename NumTraits<Scalar>::Real& prec = NumTraits<Scalar>::dummy_precision()) const
-  { return internal::isApprox(m_angle,other.m_angle, prec); }
-  
 };
 
 /** \ingroup Geometry_Module

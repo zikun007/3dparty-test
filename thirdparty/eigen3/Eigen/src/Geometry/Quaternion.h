@@ -159,28 +159,18 @@ class QuaternionBase : public RotationBase<Derived, 3>
   template<class OtherDerived> EIGEN_DEVICE_FUNC Quaternion<Scalar> slerp(const Scalar& t, const QuaternionBase<OtherDerived>& other) const;
 
   /** \returns true if each coefficients of \c *this and \a other are all exactly equal.
-    * \warning When using floating point scalar values you probably should rather use a
-    *          fuzzy comparison such as isApprox()
-    * \sa isApprox(), operator!= */
+    * \warning Floating point scalar values are compared exactly in this trimmed profile.
+    * \sa operator!= */
   template<class OtherDerived>
   EIGEN_DEVICE_FUNC inline bool operator==(const QuaternionBase<OtherDerived>& other) const
   { return coeffs() == other.coeffs(); }
 
   /** \returns true if at least one pair of coefficients of \c *this and \a other are not exactly equal to each other.
-    * \warning When using floating point scalar values you probably should rather use a
-    *          fuzzy comparison such as isApprox()
-    * \sa isApprox(), operator== */
+    * \warning Floating point scalar values are compared exactly in this trimmed profile.
+    * \sa operator== */
   template<class OtherDerived>
   EIGEN_DEVICE_FUNC inline bool operator!=(const QuaternionBase<OtherDerived>& other) const
   { return coeffs() != other.coeffs(); }
-
-  /** \returns \c true if \c *this is approximately equal to \a other, within the precision
-    * determined by \a prec.
-    *
-    * \sa MatrixBase::isApprox() */
-  template<class OtherDerived>
-  EIGEN_DEVICE_FUNC bool isApprox(const QuaternionBase<OtherDerived>& other, const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const
-  { return coeffs().isApprox(other.coeffs(), prec); }
 
   /** return the result vector of \a v through the rotation*/
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Vector3 _transformVector(const Vector3& v) const;

@@ -17,12 +17,11 @@
   *
   *
   *
-  * This module provides two variants of the Cholesky decomposition for selfadjoint (hermitian) matrices.
+  * This trimmed module provides LLT Cholesky decomposition for selfadjoint
+  * positive-definite matrices.
   * Those decompositions are also accessible via the following methods:
   *  - MatrixBase::llt()
-  *  - MatrixBase::ldlt()
   *  - SelfAdjointView::llt()
-  *  - SelfAdjointView::ldlt()
   *
   * \code
   * #include <Eigen/Cholesky>
@@ -30,7 +29,6 @@
   */
 
 #include "src/Cholesky/LLT.h"
-#include "src/Cholesky/LDLT.h"
 
 #include "src/Core/util/ReenableStupidWarnings.h"
 

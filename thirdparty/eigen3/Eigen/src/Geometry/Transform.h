@@ -636,13 +636,6 @@ public:
     m_matrix = other.matrix().template cast<Scalar>();
   }
 
-  /** \returns \c true if \c *this is approximately equal to \a other, within the precision
-    * determined by \a prec.
-    *
-    * \sa MatrixBase::isApprox() */
-  EIGEN_DEVICE_FUNC bool isApprox(const Transform& other, const typename NumTraits<Scalar>::Real& prec = NumTraits<Scalar>::dummy_precision()) const
-  { return m_matrix.isApprox(other.m_matrix, prec); }
-
   /** Sets the last row to [0 ... 0 1]
     */
   EIGEN_DEVICE_FUNC void makeAffine()

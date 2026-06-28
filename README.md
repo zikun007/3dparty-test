@@ -15,8 +15,7 @@
 │   └── syscoord.hpp            # 坐标、姿态、地球模型转换接口
 ├── test/
 │   ├── CMakeLists.txt          # 测试目标与 CTest 注册
-│   ├── test_eigen3.cpp         # Eigen3 板端基础冒烟测试（36 个断言）
-│   ├── test_eigen3_simple.cpp  # Eigen3 最小板端测试（11 个断言）
+│   ├── test_eigen3.cpp         # Eigen3 GNSS/INS 矩阵与四元数测试（41 个断言）
 │   ├── test_systime.cpp        # nav_core 时间模块测试（10 个断言）
 │   └── test_syscoord.cpp       # nav_core 坐标模块测试（12 个断言）
 └── thirdparty/
@@ -35,8 +34,8 @@
 |---|---|
 | **上游** | [eigen.tuxfamily.org](https://eigen.tuxfamily.org/) |
 | **许可证** | MPL 2.0 |
-| **保留模块** | Core, Geometry, LU, Cholesky, QR, Householder, Jacobi, STL 对齐容器支持 |
-| **去除模块** | Sparse, SVD, Eigenvalues, BLAS/LAPACK/MKL, GPU/CUDA/HIP/SYCL, unsupported |
+| **保留模块** | Core, Geometry, LU, LLT Cholesky, Householder 基础、Jacobi、STL 对齐容器支持 |
+| **去除模块** | QR/COD, LDLT, 矩阵/几何层 isApprox, Sparse, SVD, Eigenvalues, BLAS/LAPACK/MKL, GPU/CUDA/HIP/SYCL, unsupported |
 | **大小** | 约 3.0 MB |
 | **CMake 目标** | `Eigen3::Eigen` |
 
@@ -80,12 +79,11 @@ ctest
 预期输出：
 
 ```
-100% tests passed, 0 tests failed out of 4
+100% tests passed, 0 tests failed out of 3
 
-Test #1: Eigen3Smoke ...... Passed   (36 / 36 assertions)
-Test #2: Eigen3SimpleSmoke  Passed   (11 / 11 assertions)
-Test #3: SysTimeSmoke ..... Passed   (10 / 10 assertions)
-Test #4: SysCoordSmoke .... Passed   (12 / 12 assertions)
+Test #1: Eigen3Smoke ...... Passed   (41 / 41 assertions)
+Test #2: SysTimeSmoke ..... Passed   (10 / 10 assertions)
+Test #3: SysCoordSmoke .... Passed   (12 / 12 assertions)
 ```
 
 ### 集成到你的嵌入式项目

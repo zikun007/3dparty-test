@@ -113,13 +113,6 @@ public:
   inline explicit UniformScaling(const UniformScaling<OtherScalarType>& other)
   { m_factor = Scalar(other.factor()); }
 
-  /** \returns \c true if \c *this is approximately equal to \a other, within the precision
-    * determined by \a prec.
-    *
-    * \sa MatrixBase::isApprox() */
-  bool isApprox(const UniformScaling& other, const typename NumTraits<Scalar>::Real& prec = NumTraits<Scalar>::dummy_precision()) const
-  { return internal::isApprox(m_factor, other.factor(), prec); }
-
 };
 
 /** \addtogroup Geometry_Module */

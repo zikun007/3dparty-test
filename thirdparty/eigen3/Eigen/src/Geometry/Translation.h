@@ -154,13 +154,6 @@ public:
   EIGEN_DEVICE_FUNC inline explicit Translation(const Translation<OtherScalarType,Dim>& other)
   { m_coeffs = other.vector().template cast<Scalar>(); }
 
-  /** \returns \c true if \c *this is approximately equal to \a other, within the precision
-    * determined by \a prec.
-    *
-    * \sa MatrixBase::isApprox() */
-  EIGEN_DEVICE_FUNC bool isApprox(const Translation& other, const typename NumTraits<Scalar>::Real& prec = NumTraits<Scalar>::dummy_precision()) const
-  { return m_coeffs.isApprox(other.m_coeffs, prec); }
-
 };
 
 /** \addtogroup Geometry_Module */

@@ -372,16 +372,6 @@ template<typename Derived> class DenseBase
     EIGEN_DEVICE_FUNC Derived& setOnes();
     EIGEN_DEVICE_FUNC Derived& setRandom();
 
-    template<typename OtherDerived> EIGEN_DEVICE_FUNC
-    bool isApprox(const DenseBase<OtherDerived>& other,
-                  const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
-    EIGEN_DEVICE_FUNC
-    bool isMuchSmallerThan(const RealScalar& other,
-                           const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
-    template<typename OtherDerived> EIGEN_DEVICE_FUNC
-    bool isMuchSmallerThan(const DenseBase<OtherDerived>& other,
-                           const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
-
     EIGEN_DEVICE_FUNC bool isApproxToConstant(const Scalar& value, const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
     EIGEN_DEVICE_FUNC bool isConstant(const Scalar& value, const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
     EIGEN_DEVICE_FUNC bool isZero(const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;

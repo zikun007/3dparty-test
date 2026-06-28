@@ -346,14 +346,6 @@ template<typename Derived> class MatrixBase
 /////////// Cholesky module ///////////
 
     inline const LLT<PlainObject>  llt() const;
-    inline const LDLT<PlainObject> ldlt() const;
-
-/////////// QR module ///////////
-
-    inline const HouseholderQR<PlainObject> householderQr() const;
-    inline const ColPivHouseholderQR<PlainObject> colPivHouseholderQr() const;
-    inline const FullPivHouseholderQR<PlainObject> fullPivHouseholderQr() const;
-    inline const CompleteOrthogonalDecomposition<PlainObject> completeOrthogonalDecomposition() const;
 
 /////////// Eigenvalues module ///////////
 
