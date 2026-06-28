@@ -25,7 +25,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib"
 # ======================================================================
 # 2. User-configurable build options
 # ======================================================================
-option(USE_EIGEN_VECTORIZATION "Enable Eigen SIMD (NEON/SSE). ON for ARMv8-A NEON targets such as Cortex-A55" OFF)
+option(USE_EIGEN_VECTORIZATION "Enable Eigen SIMD (NEON/SSE). ON for ARMv8-A NEON targets such as Cortex-A55" ON)
 option(USE_EIGEN_PARALLEL      "Enable Eigen internal OpenMP parallelization"    OFF)
 
 # ======================================================================
@@ -49,25 +49,20 @@ set(EIGEN3_ENABLE_PARALLEL ${USE_EIGEN_PARALLEL} CACHE BOOL
 add_subdirectory(thirdparty/eigen3)
 
 # ======================================================================
-# 5. Test executables
+# 5. nav_core library
 # ======================================================================
-# Eigen test — always built (header-only, no OS dependencies)
-add_executable(test_eigen3 app/test_eigen3.cpp)
-target_link_libraries(test_eigen3 PRIVATE Eigen3::Eigen)
-
-add_executable(test_eigen3_simple app/test_eigen3_simple.cpp)
-target_link_libraries(test_eigen3_simple PRIVATE Eigen3::Eigen)
-
-# ======================================================================
-# 6. CTest
-# ======================================================================
-enable_testing()
-add_test(NAME Eigen3Smoke COMMAND test_eigen3)
-set_tests_properties(Eigen3Smoke PROPERTIES
-    PASS_REGULAR_EXPRESSION "36 / 36 passed"
+add_library(nav_core STATIC
+    nav_core/systime.cpp
 )
+add_library(nav_core::nav_core ALIAS nav_core)
 
-add_test(NAME Eigen3SimpleSmoke COMMAND test_eigen3_simple)
-set_tests_properties(Eigen3SimpleSmoke PROPERTIES
-    PASS_REGULAR_EXPRESSION "simple: 11 / 11 passed"
+target_include_directories(nav_core PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
+target_link_libraries(nav_core PUBLIC Eigen3::Eigen)
+
+include(CTest)
+
+if(BUILD_TESTING)
+    add_subdirectory(test)
+endif()

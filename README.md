@@ -9,21 +9,22 @@
 ├── CMakeLists.txt              # 顶层 CMake 项目
 ├── README.md                   # 本文件
 ├── .gitignore
-├── app/
+├── nav_core/
+│   ├── systime.hpp             # GNSS/UTC/UNIX 时间系统转换接口
+│   ├── systime.cpp             # 时间系统转换实现
+│   └── syscoord.hpp            # 坐标、姿态、地球模型转换接口
+├── test/
+│   ├── CMakeLists.txt          # 测试目标与 CTest 注册
 │   ├── test_eigen3.cpp         # Eigen3 板端基础冒烟测试（36 个断言）
-│   └── test_spdlog.cpp         # spdlog 全面测试（27 个断言）
+│   ├── test_eigen3_simple.cpp  # Eigen3 最小板端测试（11 个断言）
+│   ├── test_systime.cpp        # nav_core 时间模块测试（10 个断言）
+│   └── test_syscoord.cpp       # nav_core 坐标模块测试（12 个断言）
 └── thirdparty/
     ├── eigen3/                 # → Eigen3 SRKF 嵌入式裁剪版（约 3.0 MB）
     │   ├── README.md           #    详细使用说明
     │   ├── CMakeLists.txt
     │   ├── COPYING.MPL2
     │   └── Eigen/
-    └── spdlog/                 # → spdlog 裁剪版（嵌入式优化, 1.1 MB）
-        ├── README.md           #    详细使用说明
-        ├── CMakeLists.txt
-        ├── LICENSE
-        ├── include/
-        └── src/
 ```
 
 ## 包含的库
@@ -47,25 +48,21 @@ Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
 
 详见 [thirdparty/eigen3/README.md](thirdparty/eigen3/README.md)
 
-### spdlog — 高性能日志（嵌入式优化）
+### nav_core — 组合导航基础工具
 
 | 项目 | 详情 |
 |---|---|
-| **上游** | [github.com/gabime/spdlog](https://github.com/gabime/spdlog) v1.17.0 |
-| **许可证** | MIT |
-| **保留模块** | 核心同步日志 + 5 种 sink（stdout / file / rotating / null / base_sink） |
-| **去除模块** | 异步日志、颜色控制台、网络/平台特定 sink (syslog/systemd/kafka 等) |
-| **格式化** | 内嵌 bundled fmt（无外部依赖） |
-| **大小** | 1.1 MB |
-| **CMake 目标** | `spdlog::spdlog` |
+| **功能** | 时间系统转换、地球模型、坐标转换、姿态转换 |
+| **依赖** | `Eigen3::Eigen` |
+| **CMake 目标** | `nav_core::nav_core` |
 
 ```cpp
-#include <spdlog/spdlog.h>
-spdlog::info("Hello {}!", "world");
-auto logger = spdlog::basic_logger_mt("app", "app.log");
-```
+#include "nav_core/systime.hpp"
+#include "nav_core/syscoord.hpp"
 
-详见 [thirdparty/spdlog/README.md](thirdparty/spdlog/README.md)
+auto t = nav_core::ComTime::fromUtc(2026, 1, 1, 0, 0, 0.0);
+Eigen::Vector3d xyz = nav_core::blh2xyz({30.0 * nav_core::kD2R, 114.0 * nav_core::kD2R, 42.0});
+```
 
 ## 快速开始
 
@@ -83,10 +80,12 @@ ctest
 预期输出：
 
 ```
-100% tests passed, 0 tests failed out of 2
+100% tests passed, 0 tests failed out of 4
 
-Test #1: Eigen3Smoke ... Passed   ( 36/ 36 assertions)
-Test #2: SpdlogSmoke ... Passed   ( 27/ 27 assertions)
+Test #1: Eigen3Smoke ...... Passed   (36 / 36 assertions)
+Test #2: Eigen3SimpleSmoke  Passed   (11 / 11 assertions)
+Test #3: SysTimeSmoke ..... Passed   (10 / 10 assertions)
+Test #4: SysCoordSmoke .... Passed   (12 / 12 assertions)
 ```
 
 ### 集成到你的嵌入式项目
@@ -97,12 +96,10 @@ Test #2: SpdlogSmoke ... Passed   ( 27/ 27 assertions)
 # 在你的 CMakeLists.txt 中
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(3dparty-test/thirdparty/eigen3)
-add_subdirectory(3dparty-test/thirdparty/spdlog)
+add_subdirectory(3dparty-test)
 
 target_link_libraries(your_app PRIVATE
-    Eigen3::Eigen
-    spdlog::spdlog
+    nav_core::nav_core
 )
 ```
 
@@ -119,29 +116,16 @@ git submodule add <this-repo> 3dparty-test
 ### Eigen3
 
 ```cmake
-# Cortex-A (ARMv8, NEON)
-add_compile_options(-mcpu=cortex-a53 -mfpu=neon-fp-armv8)
-target_compile_definitions(your_app PRIVATE EIGEN_NO_IO)
-```
-
-### spdlog
-
-```cmake
-# 推荐在嵌入式 release 构建中开启
-set(SPDLOG_NO_EXCEPTIONS    ON CACHE BOOL "")
-set(SPDLOG_NO_THREAD_ID     ON CACHE BOOL "")
-set(SPDLOG_NO_ATOMIC_LEVELS ON CACHE BOOL "")
-set(SPDLOG_DISABLE_DEFAULT_LOGGER ON CACHE BOOL "")
-
-# 编译期剔除低级别日志
-target_compile_definitions(your_app PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_WARN)
+# i.MX93 / Cortex-A55 板端工具链稳定性优先时建议关闭向量化。
+set(USE_EIGEN_VECTORIZATION OFF CACHE BOOL "")
+set(USE_EIGEN_PARALLEL OFF CACHE BOOL "")
 ```
 
 更多细节见各库的 README。
 
-## 两个库的详细说明
+## 详细说明
 
-每个裁剪库目录下均有独立的 `README.md`，包含：
+Eigen3 裁剪库目录下有独立的 `README.md`，包含：
 - 保留/去除模块的完整清单
 - CMake 集成示例
 - 嵌入式优化建议
@@ -152,6 +136,5 @@ target_compile_definitions(your_app PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_WAR
 | 库 | 许可证 | 文件 |
 |---|---|---|
 | Eigen3 | MPL 2.0 | `thirdparty/eigen3/COPYING.MPL2` |
-| spdlog | MIT | `thirdparty/spdlog/LICENSE` |
 
-两个许可证均允许商用和闭源使用。
+Eigen MPL 2.0 许可证允许商用和闭源使用。
